@@ -1,20 +1,17 @@
 const { isEmpty } = require("lodash");
 const util = require("util");
+
+// B -> D -> E -> F
 const CSV_DATA = [
   {
     activity: "a",
     predecessors: null,
     duration: 7,
-    relationship: {},
   },
   {
     activity: "b",
     predecessors: null,
     duration: 9,
-    relationship: {
-      type: "SS",
-      dependsOn: "",
-    },
   },
   {
     activity: "c",
@@ -56,10 +53,7 @@ class Node {
     this.CP = "";
     this.isOnCriticalPath = null;
     // relatioship
-    this.relationship = {
-      type: "",
-      predecessor: "",
-    };
+   
 
     this.lag = null;
     //slack
@@ -134,6 +128,13 @@ function backward(node) {
 
   node.LF = min;
   node.LS = node.LF - node.duration;
+
+  const slack = node.LS - node.ES;
+    const isOnCriticalPath = slack === 0;
+    node.slack = slack;
+    node.CP = isOnCriticalPath ? "Yes" : "NO";
+    node.isOnCriticalPath = isOnCriticalPath;
+
 }
 
 function computeSlack() {
@@ -171,14 +172,7 @@ for (const activity in node_dict) {
   }
 }
 
-//console.log(node_dict);
-// console.log(
-//   util.inspect(node_dict, { showHidden: false, depth: null, colors: true })
-// );
 
-// console.log(
-//   util.inspect(start, { showHidden: false, depth: null, colors: true })
-// );
 
 forward(end);
 
@@ -188,9 +182,17 @@ end.LF = end.ES;
 
 backward(start);
 
-computeSlack();
+//computeSlack();
 // console.log(
 //   util.inspect(node_dict, { showHidden: false, depth: 2, colors: true })
 // );
 
-console.log(util.inspect(end, { showHidden: false, depth: 2, colors: true }));
+//console.log(util.inspect(end, { showHidden: false, depth: 2, colors: true }));
+//console.log(node_dict);
+// console.log(
+//   util.inspect(node_dict, { showHidden: false, depth: null, colors: true })
+// );
+
+console.log(
+  util.inspect(start, { showHidden: false, depth: null, colors: true })
+);
