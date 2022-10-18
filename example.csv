@@ -1,0 +1,6 @@
+Activity,Duration,Depends
+A,1,---
+B,3,---
+C,5,A
+D,1,B
+E,4,"C,D"

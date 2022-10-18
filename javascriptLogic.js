@@ -1,44 +1,6 @@
 const { isEmpty, isUndefined, find } = require("lodash");
 const util = require("util");
-
-// B -> D -> E -> F
-const CSV_DATA = [
-    {
-        activity: "a",
-        predecessors: null,
-        duration: 7,
-    },
-    {
-        activity: "b",
-        predecessors: null,
-        duration: 9,
-    },
-    {
-        activity: "c",
-        predecessors: ["a"],
-        duration: 12,
-    },
-    {
-        activity: "d",
-        predecessors: ["a", "b"],
-        duration: 8,
-    },
-    {
-        activity: "e",
-        predecessors: ["d"],
-        duration: 9,
-    },
-    {
-        activity: "f",
-        predecessors: ["c", "e"],
-        duration: 6,
-    },
-    {
-        activity: "g",
-        predecessors: ["e"],
-        duration: 5,
-    },
-];
+const CSVToJSON = require('csvtojson')
 
 class Node {
     constructor(activity) {
@@ -138,7 +100,7 @@ function buildDataStream({ csvData }) {
     return node_dict
 }
 
-function getStartAndEndObj({ node_dict }) {
+function getStartAndEndObj(node_dict) {
     const start = new Node("start");
     start.ES = 0;
     start.EF = 0;
@@ -188,12 +150,33 @@ function findPath(node) {
     }
 }
 
-const node_dict = buildDataStream({ csvData: CSV_DATA })
+CSVToJSON()
+    .fromFile('example.csv')
+    .then(tasks => {
+        const CSV_DATA = tasks.map(task => {
+            const { Activity: activity, Duration: duration, Depends } = task
 
-const { start, end } = getStartAndEndObj({ node_dict })
+            const newTask = {
+                activity,
+                duration,
+                predecessors: Depends === '---' ? null : Depends.split(',')
+            }
+            return newTask
+        });
 
-findPath(start.next);
-console.log(`${criticalPath}end`);
+        const node_dict = buildDataStream({ csvData: CSV_DATA })
+
+        const { start, end } = getStartAndEndObj(node_dict)
+
+        findPath(start.next);
+        console.log(`${criticalPath}end`);
+    })
+    .catch(err => {
+        // log error if any
+        console.log(err)
+    })
+
+
 
 
 
