@@ -1,8 +1,5 @@
-const csv = require('csvtojson/v2')
+let csvToJson = require('convert-csv-to-json');
 
-async function readCsv() {
-    return csv().fromFile('./Assignment_1_2022.csv');
-}
-
-const jsonArray= await csv().fromFile('Assignment_1_2022.csv')
-console.log(jsonArray)
+// csvToJson.getJsonFromCsv("Assignment_1_2022.csv");
+ let json = csvToJson.parseSubArray(',').getJsonFromCsv('Assignment_1_2022.csv');
+console.log(json)
