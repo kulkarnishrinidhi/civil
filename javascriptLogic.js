@@ -1,4 +1,4 @@
-const { isEmpty } = require("lodash");
+const { isEmpty, isUndefined, find } = require("lodash");
 const util = require("util");
 
 // B -> D -> E -> F
@@ -53,7 +53,6 @@ class Node {
     this.CP = "";
     this.isOnCriticalPath = null;
     // relatioship
-   
 
     this.lag = null;
     //slack
@@ -130,11 +129,10 @@ function backward(node) {
   node.LS = node.LF - node.duration;
 
   const slack = node.LS - node.ES;
-    const isOnCriticalPath = slack === 0;
-    node.slack = slack;
-    node.CP = isOnCriticalPath ? "Yes" : "NO";
-    node.isOnCriticalPath = isOnCriticalPath;
-
+  const isOnCriticalPath = slack === 0;
+  node.slack = slack;
+  node.CP = isOnCriticalPath ? "Yes" : "NO";
+  node.isOnCriticalPath = isOnCriticalPath;
 }
 
 function computeSlack() {
@@ -172,8 +170,6 @@ for (const activity in node_dict) {
   }
 }
 
-
-
 forward(end);
 
 end.LS = end.ES;
@@ -181,6 +177,8 @@ end.EF = end.ES;
 end.LF = end.ES;
 
 backward(start);
+
+// function getNextNode()
 
 //computeSlack();
 // console.log(
@@ -192,7 +190,21 @@ backward(start);
 // console.log(
 //   util.inspect(node_dict, { showHidden: false, depth: null, colors: true })
 // );
-
-console.log(
-  util.inspect(start, { showHidden: false, depth: null, colors: true })
-);
+// console.log(
+//   util.inspect(node_dict, { showHidden: false, depth: null, colors: true })
+// );
+var criticalPath = "start-";
+function findPath(node) {
+  if (isEmpty(node)) {
+    // criticalPath += "end";
+    return;
+  }
+  for (let child of node) {
+    if (!isEmpty(child?.next) && child.isOnCriticalPath) {
+      criticalPath += child?.activity + "-";
+      findPath(child.next);
+    }
+  }
+}
+findPath(start.next);
+console.log(criticalPath, "critical path");
