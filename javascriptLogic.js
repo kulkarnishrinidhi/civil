@@ -151,7 +151,7 @@ function findPath(node) {
 }
 
 CSVToJSON()
-    .fromFile('example.csv')
+    .fromFile('WORKING.csv')
     .then(tasks => {
         const CSV_DATA = tasks.map(task => {
             const { Activity: activity, Duration: duration, Depends } = task
