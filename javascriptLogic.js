@@ -186,16 +186,18 @@ function findPath(node) {
 
 //Reading input from CSV file
 CSVToJSON()
-    .fromFile('WORKING.csv')
+    .fromFile('Assignment_1_2022.csv')
     .then(tasks => {
         const CSV_DATA = tasks.map(task => {
-            const { Activity: activity, Duration: duration, Depends } = task
-
+            const { Activity: activity, Duration: duration } = task
+            const Depends = task['Depends on']
             const newTask = {
                 activity,
                 duration,
                 predecessors: Depends === '---' ? null : Depends.split(',')
             }
+
+    console.log(newTask)
             return newTask
         });
 
