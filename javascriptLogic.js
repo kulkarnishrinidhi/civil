@@ -201,7 +201,7 @@ CSVToJSON()
 
         const node_dict = buildDataStream({ csvData: CSV_DATA })
 
-        const { start } = getStartAndEndObj(node_dict)
+        const { start, end } = getStartAndEndObj(node_dict)
 
         findPath(start.next);
 
@@ -218,8 +218,10 @@ CSVToJSON()
                 'CP': node.CP
             }
         })
-        table(tableData)
+        console.log(`Project duration is: ${end.LF}`)
         console.log(`Critical Path is: ${criticalPath.join('-')}`)
+        table(tableData)
+        
     })
     .catch(err => {
         // log error if any
