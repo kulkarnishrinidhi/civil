@@ -1,6 +1,7 @@
 const { isEmpty, isUndefined, find } = require("lodash");
 const util = require("util");
 const CSVToJSON = require('csvtojson')
+var fs = require('fs');
 
 class Node {
   constructor(activity) {
@@ -135,7 +136,7 @@ function getStartAndEndObj(node_dict) {
   return { start, end }
 }
 
-var criticalPath = "start-";
+var criticalPath = [];
 function findPath(node) {
   if (isEmpty(node)) {
     // criticalPath += "end";
@@ -143,7 +144,7 @@ function findPath(node) {
   }
   for (let child of node) {
     if (!isEmpty(child?.next) && child.isOnCriticalPath) {
-      criticalPath += child?.activity + "-";
+      criticalPath.push(child?.activity);
       findPath(child.next);
     }
   }
@@ -168,7 +169,44 @@ CSVToJSON()
     const { start, end } = getStartAndEndObj(node_dict)
 
     findPath(start.next);
-    console.log(`${criticalPath}end`);
+
+    /**
+     * TF is slack
+     */
+    const projectDuration = [`Project duration is ${end.ES}`];
+    const critPath = [`Critical Path is: ${criticalPath.join('-')}`];
+    const tableHeader = ['Activity', 'Duration', 'ES', 'EF', 'LS', 'LF', 'TF', 'FF', 'CP']
+    const tableBody = [];
+    Object.values(node_dict).forEach(node => {
+      tableBody.push([
+        node.activity,
+        node.duration,
+        node.ES,
+        node.EF,
+        node.LS,
+        node.LF,
+        node.slack, // TF
+        '', // FF
+        node.CP
+      ])
+    })
+
+    const CSVRows = [
+      projectDuration,
+      critPath,
+      tableHeader,
+      ...tableBody
+    ];
+
+    let csvContent = CSVRows.map(e => e.join(",")).join("\n");
+    console.log({ csvContent })
+    fs.writeFile('output.csv', csvContent, 'utf8', function (err) {
+      if (err) {
+        console.log('Some error occured - file either not saved or corrupted file saved.', err);
+      } else {
+        console.log('It\'s saved!');
+      }
+    });
   })
   .catch(err => {
     // log error if any
