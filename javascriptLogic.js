@@ -1,8 +1,11 @@
-const { isEmpty, isUndefined, find } = require("lodash");
-const util = require("util");
+// lodash is utility library
+const { isEmpty } = require("lodash");
+// csvtojson is a library to read contents of csv file
 const CSVToJSON = require('csvtojson')
+// a library to create a csv file
 var fs = require('fs');
 
+// Node represents blueprint of an activity
 class Node {
   constructor(activity) {
     this.activity = activity;
@@ -12,21 +15,26 @@ class Node {
     this.LS = null;
     this.LF = null;
 
-    //CP
+    //Critical path
     this.CP = "";
     this.isOnCriticalPath = null;
+    
     // relatioship
-
     this.lag = null;
+    
     //slack
     this.slack = null;
+    //freeFloat
+    this.freeFloat = null;
 
-    //pointers
+    //pointers next = successor activities and prev = predecessor activities
     this.next = [];
     this.prev = [];
   }
 }
 
+// Logic for forwards pass to calculate ES and EF
+// This function uses recursion strategy to find ES and EF
 function forward(node) {
   let max = 0;
   if (!isEmpty(node?.prev)) {
@@ -44,14 +52,20 @@ function forward(node) {
   node.EF = node.ES + node.duration;
 }
 
+// Logic for Backward pass to calculate LS and LF
+// This function uses recursion strategy to find LS and LF
 function backward(node) {
   let min = 30000000;
+  let minES = 3000000; 
   node?.next.forEach((next) => {
     if (next.LS === null) {
       backward(next);
     }
     if (next.LS < min) {
       min = next.LS;
+    }
+    if (next.ES < minES) {
+      minES = next.ES;
     }
   });
 
@@ -63,6 +77,7 @@ function backward(node) {
   node.LS = node.LF - node.duration;
 
   const slack = node.LS - node.ES;
+  const freeFloat = minES - node.ES - node.duration;
   const isOnCriticalPath = slack === 0;
   node.slack = slack;
   node.CP = isOnCriticalPath ? "Yes" : "NO";
@@ -150,6 +165,7 @@ function findPath(node) {
   }
 }
 
+//Reading input from CSV file
 CSVToJSON()
   .fromFile('WORKING.csv')
   .then(tasks => {
@@ -177,6 +193,7 @@ CSVToJSON()
     const critPath = [`Critical Path is: ${criticalPath.join('-')}`];
     const tableHeader = ['Activity', 'Duration', 'ES', 'EF', 'LS', 'LF', 'TF', 'FF', 'CP']
     const tableBody = [];
+    console.log(node_dict)
     Object.values(node_dict).forEach(node => {
       tableBody.push([
         node.activity,
@@ -186,7 +203,7 @@ CSVToJSON()
         node.LS,
         node.LF,
         node.slack, // TF
-        '', // FF
+        node.freeFloat, // FF
         node.CP
       ])
     })
@@ -212,24 +229,3 @@ CSVToJSON()
     // log error if any
     console.log(err)
   })
-
-
-
-
-
-
-// function getNextNode()
-
-//computeSlack();
-// console.log(
-//   util.inspect(node_dict, { showHidden: false, depth: 2, colors: true })
-// );
-
-//console.log(util.inspect(end, { showHidden: false, depth: 2, colors: true }));
-//console.log(node_dict);
-// console.log(
-//   util.inspect(node_dict, { showHidden: false, depth: null, colors: true })
-// );
-// console.log(
-//   util.inspect(node_dict, { showHidden: false, depth: null, colors: true })
-// );
