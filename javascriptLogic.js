@@ -2,8 +2,6 @@
 const { isEmpty } = require("lodash");
 // csvtojson is a library to read contents of csv file
 const CSVToJSON = require('csvtojson')
-// a library to create a csv file
-var fs = require('fs');
 
 const { Console } = require('console');
 const { Transform } = require('stream');
